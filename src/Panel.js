@@ -26,6 +26,8 @@ const Panel = styled.div`
 `;
 
 const PanelComp = ({
+  data,
+  metric,
   setMetric,
   region,
   setRegion,
@@ -46,7 +48,7 @@ const PanelComp = ({
         dateTo={dateTo}
         setDateTo={setDateTo}
       />
-      <Rankings />
+      <Rankings data={data} metric={metric} region={region} />
     </Panel>
   );
 };

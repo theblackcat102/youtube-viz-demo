@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { format } from "date-fns";
 
 const Tooltip = styled.div`
   display: none;
@@ -35,7 +36,7 @@ const TooltipHeader = styled.h2`
 
 const RankingsItemBadge = styled.span`
   display: inline-block;
-  margin-left: 10px;
+  margin-right: 10px;
   width: 10px;
   height: 10px;
   background-color: ${props => {
@@ -53,16 +54,17 @@ const TooltipPara = styled.p`
   margin-top: 30px;
 `;
 
-const TooltipComp = ({ metric, region }) => {
+const TooltipComp = ({ metric, region, dateFrom, dateTo }) => {
   return (
     <Tooltip id="tooltip">
-      <TooltipHeader id="tooltip-header">Donald Trump</TooltipHeader>
       <RankingsItemBadge type="1" id="tooltip-badge" />
+      <TooltipHeader id="tooltip-header"></TooltipHeader>
       <TooltipPara>
         <span id="tooltip-value">1131</span>{" "}
         {metric.charAt(0).toUpperCase() + metric.slice(1)} for{" "}
-        {region.charAt(0).toUpperCase() + region.slice(1)} between 19th November
-        2019 and 23rd November 2019.
+        {region.charAt(0).toUpperCase() + region.slice(1)} between{" "}
+        {format(new Date(dateFrom), "do MMMM yyyy")} and{" "}
+        {format(new Date(dateTo), "do MMMM yyyy")}.
       </TooltipPara>
     </Tooltip>
   );

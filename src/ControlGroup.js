@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { format, subDays } from "date-fns";
 
 const ControlGroup = styled.div`
   font-family: var(--font-primary), monospace;
@@ -162,7 +163,7 @@ const ControlGroupComp = ({
           id="dateFrom"
           name="dateFrom"
           min="2019-11-01"
-          max="2019-12-30"
+          max={format(subDays(new Date(), 1), "yyyy-MM-dd")}
           value={dateFrom}
           onChange={e => {
             setDateFrom(e.target.value);
@@ -177,7 +178,7 @@ const ControlGroupComp = ({
           id="dateTo"
           name="dateTo"
           min="2019-11-02"
-          max="2019-12-31"
+          max={format(new Date(), "yyyy-MM-dd")}
           value={dateTo}
           onChange={e => {
             setDateTo(e.target.value);
