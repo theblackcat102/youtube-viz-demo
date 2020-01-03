@@ -23,7 +23,6 @@ let heightOffset;
 const Viz = styled.svg`
   width: 60vw;
   height: ${window.innerHeight - 5}px;
-  // border: 1px solid red;
 
   @media (max-width: 768px) {
     margin: 30px 0;
@@ -129,6 +128,7 @@ const renderViz = (wrapper, metric, region, setRegion, data) => {
         case 2:
           return "#547478";
         default: {
+          console.log(d.data.type);
           if (d.data.type === 1) {
             return "var(--color-accent-one)";
           } else if (d.data.type === 2) {
@@ -179,6 +179,7 @@ const renderViz = (wrapper, metric, region, setRegion, data) => {
         let tooltip = document.querySelector("#tooltip");
         let header = document.querySelector("#tooltip-header");
         let badge = document.querySelector("#tooltip-badge");
+        let tooltipRegion = document.querySelector("#tooltip-region");
         let value = document.querySelector("#tooltip-value");
 
         tooltip.style.left = `${nodalPos.right + 10}px`;
@@ -190,6 +191,7 @@ const renderViz = (wrapper, metric, region, setRegion, data) => {
             : d.data.type === 2
             ? "var(--color-accent-two)"
             : "var(--color-accent-three)";
+        tooltipRegion.innerHTML = d.parent.data.name;
         value.innerHTML = d.data[metric];
         tooltip.style.display = "block";
 

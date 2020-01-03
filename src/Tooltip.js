@@ -14,18 +14,6 @@ const Tooltip = styled.div`
   color: var(--color-text);
   background-color: #34494b;
   padding: 15px 30px;
-
-  &::after {
-    // content: "";
-    // position: absolute;
-    // width: 0;
-    // height: 0;
-    // border-width: 10px;
-    // border-style: solid;
-    // border-color: transparent #34494b transparent transparent;
-    // top: 0;
-    // left: -20px;
-  }
 `;
 
 const TooltipHeader = styled.h2`
@@ -62,7 +50,7 @@ const TooltipComp = ({ metric, region, dateFrom, dateTo }) => {
       <TooltipPara>
         <span id="tooltip-value">1131</span>{" "}
         {metric.charAt(0).toUpperCase() + metric.slice(1)} for{" "}
-        {region.charAt(0).toUpperCase() + region.slice(1)} between{" "}
+        <span id="tooltip-region"></span> between{" "}
         {format(new Date(dateFrom), "do MMMM yyyy")} and{" "}
         {format(new Date(dateTo), "do MMMM yyyy")}.
       </TooltipPara>

@@ -6,8 +6,6 @@ const ControlGroup = styled.div`
   font-family: var(--font-primary), monospace;
   font-size: 16px;
   color: var(--color-text);
-  //   border: 5px solid green;
-  margin-top: 80px;
 
   @media (max-width: 1100px) {
     margin-top: 50px;

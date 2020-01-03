@@ -44,6 +44,19 @@ const regionMapping = {
   NZ: "Oceania"
 };
 
+const categoryMapping = {
+  1: 1,
+  10: 1,
+  17: 3,
+  20: 1,
+  22: 2,
+  23: 1,
+  24: 1,
+  25: 3,
+  26: 2,
+  28: 3
+};
+
 const AccentBar = styled.div`
   height: 5px;
   background: linear-gradient(
@@ -56,7 +69,6 @@ const AccentBar = styled.div`
 
 const Dashboard = styled.div`
   display: flex;
-  // border: 1px solid blue;
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -112,6 +124,8 @@ function App() {
           ]
         };
 
+        console.log(fetched.results);
+
         for (const d of fetched.results) {
           switch (regionMapping[d.id]) {
             case "Europe":
@@ -120,8 +134,9 @@ function App() {
                 children: d.topic.map(t => {
                   return {
                     name: t.tag,
-                    type: Math.floor(Math.random() * 3) + 1,
-                    popularity: Math.round(Math.random() * 10000),
+                    type: categoryMapping[t.category[0]]
+                      ? categoryMapping[t.category[0]]
+                      : Math.floor(Math.random() * 3) + 1,
                     views: Math.round(t.view),
                     likes: Math.round(t.like),
                     comments: Math.round(t.comment)
@@ -135,8 +150,9 @@ function App() {
                 children: d.topic.map(t => {
                   return {
                     name: t.tag,
-                    type: Math.floor(Math.random() * 3) + 1,
-                    popularity: Math.round(Math.random() * 10000),
+                    type: categoryMapping[t.category[0]]
+                      ? categoryMapping[t.category[0]]
+                      : Math.floor(Math.random() * 3) + 1,
                     views: Math.round(t.view),
                     likes: Math.round(t.like),
                     comments: Math.round(t.comment)
@@ -150,8 +166,9 @@ function App() {
                 children: d.topic.map(t => {
                   return {
                     name: t.tag,
-                    type: Math.floor(Math.random() * 3) + 1,
-                    popularity: Math.round(Math.random() * 10000),
+                    type: categoryMapping[t.category[0]]
+                      ? categoryMapping[t.category[0]]
+                      : Math.floor(Math.random() * 3) + 1,
                     views: Math.round(t.view),
                     likes: Math.round(t.like),
                     comments: Math.round(t.comment)
@@ -165,8 +182,9 @@ function App() {
                 children: d.topic.map(t => {
                   return {
                     name: t.tag,
-                    type: Math.floor(Math.random() * 3) + 1,
-                    popularity: Math.round(Math.random() * 10000),
+                    type: categoryMapping[t.category[0]]
+                      ? categoryMapping[t.category[0]]
+                      : Math.floor(Math.random() * 3) + 1,
                     views: Math.round(t.view),
                     likes: Math.round(t.like),
                     comments: Math.round(t.comment)
@@ -180,8 +198,9 @@ function App() {
                 children: d.topic.map(t => {
                   return {
                     name: t.tag,
-                    type: Math.floor(Math.random() * 3) + 1,
-                    popularity: Math.round(Math.random() * 10000),
+                    type: categoryMapping[t.category[0]]
+                      ? categoryMapping[t.category[0]]
+                      : Math.floor(Math.random() * 3) + 1,
                     views: Math.round(t.view),
                     likes: Math.round(t.like),
                     comments: Math.round(t.comment)

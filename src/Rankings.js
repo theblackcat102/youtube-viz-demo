@@ -6,8 +6,10 @@ const Rankings = styled.ul`
   font-family: var(--font-primary), monospace;
   font-size: 16px;
   color: var(--color-text);
-  margin-top: 30px;
-  //   border: 5px solid green;
+
+  @media (max-width: 1100px) {
+    margin-top: 30px;
+  }
 `;
 
 const RankingsItem = styled.li`
@@ -30,38 +32,28 @@ const RankingsItemBadge = styled.span`
   }};
 `;
 
-const Loading = styled.div`
-  font-family: var(--font-primary), monospace;
-  font-size: 16px;
-  color: var(--color-text);
-`;
-
 const RankingsComp = ({ data, metric, region }) => {
   const [rankings, setRankings] = useState(null);
 
   useEffect(() => {
-    if (data) {
-      const processedRoot = hierarchy(data)
-        .sum(d => d[metric])
-        .sort(function(a, b) {
-          return b.value - a.value;
-        });
+    const processedRoot = hierarchy(data)
+      .sum(d => d[metric])
+      .sort(function(a, b) {
+        return b.value - a.value;
+      });
 
-      const processedRankings = processedRoot
-        .descendants()
-        .find(des => des.data.name === region)
-        .leaves()
-        .slice(0, 10);
+    const processedRankings = processedRoot
+      .descendants()
+      .find(des => des.data.name === region)
+      .leaves()
+      .slice(0, 10);
 
-      setRankings(processedRankings);
-    } else {
-      setRankings(null);
-    }
+    setRankings(processedRankings);
   }, [data, metric, region]);
 
   return (
     <Rankings>
-      {rankings ? (
+      {rankings &&
         rankings.map((rank, idx) => {
           return (
             <RankingsItem key={idx}>
@@ -69,10 +61,7 @@ const RankingsComp = ({ data, metric, region }) => {
               <RankingsItemBadge type={rank.data.type} />
             </RankingsItem>
           );
-        })
-      ) : (
-        <Loading>Loading Rankings...</Loading>
-      )}
+        })}
     </Rankings>
   );
 };
