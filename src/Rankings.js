@@ -1,106 +1,67 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
+import { hierarchy } from "d3-hierarchy";
 
 const Rankings = styled.ul`
   font-family: var(--font-primary), monospace;
   font-size: 16px;
   color: var(--color-text);
-  margin-top: 30px;
-  //   border: 5px solid green;
+
+  @media (max-width: 1100px) {
+    margin-top: 30px;
+  }
 `;
 
 const RankingsItem = styled.li`
   display: flex;
   justify-content: space-between;
   align-items: center;
-
-  & > button {
-    cursor: pointer;
-  }
-
-  & > button:hover {
-    color: ${props => {
-      if (props.type === "1") {
-        return "var(--color-accent-one)";
-      } else if (props.type === "2") {
-        return "var(--color-accent-two)";
-      } else if (props.type === "3") {
-        return "var(--color-accent-three)";
-      }
-    }};
-  }
 `;
 
 const RankingsItemBadge = styled.span`
   width: 10px;
   height: 10px;
   background-color: ${props => {
-    if (props.type === "1") {
+    if (props.type === 1) {
       return "var(--color-accent-one)";
-    } else if (props.type === "2") {
+    } else if (props.type === 2) {
       return "var(--color-accent-two)";
-    } else if (props.type === "3") {
+    } else if (props.type === 3) {
       return "var(--color-accent-three)";
     }
   }};
 `;
 
-const rankingsArr = [
-  {
-    name: "Donald Trump",
-    type: "1"
-  },
-  {
-    name: "G20",
-    type: "1"
-  },
-  {
-    name: "Brexit",
-    type: "1"
-  },
-  {
-    name: "Ariana Grande",
-    type: "2"
-  },
-  {
-    name: "Ethereum",
-    type: "3"
-  },
-  {
-    name: "Cybertruck",
-    type: "2"
-  },
-  {
-    name: "Elon Musk",
-    type: "3"
-  },
-  {
-    name: "Ebola Virus",
-    type: "3"
-  },
-  {
-    name: "First Snow",
-    type: "1"
-  },
-  {
-    name: "Hong Kong Protests",
-    type: "2"
-  }
-];
+const RankingsComp = ({ data, metric, region }) => {
+  const [rankings, setRankings] = useState(null);
 
-const RankingsComp = () => {
+  useEffect(() => {
+    const processedRoot = hierarchy(data)
+      .sum(d => d[metric])
+      .sort(function(a, b) {
+        return b.value - a.value;
+      });
+
+    const processedRankings = processedRoot
+      .descendants()
+      .find(des => des.data.name === region)
+      .leaves()
+      .slice(0, 10);
+
+    setRankings(processedRankings);
+  }, [data, metric, region]);
+
   return (
     <Rankings>
-      {rankingsArr.map((item, idx) => {
-        return (
-          <RankingsItem type={item.type} key={item.name}>
-            <button style={{ textAlign: "left" }}>
-              {idx + 1}. {item.name}
-            </button>
-            <RankingsItemBadge type={item.type} />
-          </RankingsItem>
-        );
-      })}
+      {rankings &&
+        rankings.map((rank, idx) => {
+          return (
+            <RankingsItem key={idx}>
+              {idx + 1}. {rank.data.name}
+              <RankingsItemBadge type={rank.data.type} />
+            </RankingsItem>
+          );
+        })}
     </Rankings>
   );
 };

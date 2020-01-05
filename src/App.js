@@ -1,11 +1,61 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import ky from "ky";
+import { format, subWeeks } from "date-fns";
 
 import Defaults from "./Defaults";
 import Panel from "./Panel";
 import Viz from "./Viz";
 import Tooltip from "./Tooltip";
+
+const regionMapping = {
+  GB: "Europe",
+  CH: "Europe",
+  NL: "Europe",
+  IE: "Europe",
+  DE: "Europe",
+  DK: "Europe",
+  RU: "Europe",
+  IT: "Europe",
+  FR: "Europe",
+  SK: "Europe",
+  GR: "Europe",
+  PT: "Europe",
+  SG: "Asia",
+  HK: "Asia",
+  VN: "Asia",
+  MY: "Asia",
+  IN: "Asia",
+  ID: "Asia",
+  PH: "Asia",
+  KZ: "Asia",
+  AE: "Asia",
+  TH: "Asia",
+  JP: "Asia",
+  TW: "Asia",
+  US: "North America",
+  PR: "North America",
+  PA: "North America",
+  CA: "North America",
+  MX: "North America",
+  BR: "South America",
+  AR: "South America",
+  AU: "Oceania",
+  NZ: "Oceania"
+};
+
+const categoryMapping = {
+  1: 1,
+  10: 1,
+  17: 3,
+  20: 1,
+  22: 2,
+  23: 1,
+  24: 1,
+  25: 3,
+  26: 2,
+  28: 3
+};
 
 const AccentBar = styled.div`
   height: 5px;
@@ -19,7 +69,6 @@ const AccentBar = styled.div`
 
 const Dashboard = styled.div`
   display: flex;
-  // border: 1px solid blue;
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -44,14 +93,18 @@ const Loading = styled.div`
 `;
 
 function App() {
-  const [rawData, setRawData] = useState(null);
+  const [data, setData] = useState(null);
   const [metric, setMetric] = useState("views");
   const [region, setRegion] = useState("Global");
-  const [dateFrom, setDateFrom] = useState("2019-12-01");
-  const [dateTo, setDateTo] = useState("2019-12-31");
+  const [dateFrom, setDateFrom] = useState(
+    format(subWeeks(new Date(), 1), "yyyy-MM-dd")
+  );
+  const [dateTo, setDateTo] = useState(format(new Date(), "yyyy-MM-dd"));
+  const fetchID = useRef(null);
 
   useEffect(() => {
-    setRawData(null);
+    setData(null);
+    fetchID.current = `${dateFrom}-${dateTo}`;
     const fetchData = async () => {
       const fetched = await ky
         .get(
@@ -59,12 +112,112 @@ function App() {
           { timeout: 60000 }
         )
         .json();
+      if (fetchID.current === `${dateFrom}-${dateTo}`) {
+        const formattedData = {
+          name: "Global",
+          children: [
+            { name: "Europe", children: [] },
+            { name: "Asia", children: [] },
+            { name: "North America", children: [] },
+            { name: "South America", children: [] },
+            { name: "Oceania", children: [] }
+          ]
+        };
 
-      setRawData(fetched.results);
+        console.log(fetched.results);
+
+        for (const d of fetched.results) {
+          switch (regionMapping[d.id]) {
+            case "Europe":
+              formattedData.children[0].children.push({
+                name: d.name,
+                children: d.topic.map(t => {
+                  return {
+                    name: t.tag,
+                    type: categoryMapping[t.category[0]]
+                      ? categoryMapping[t.category[0]]
+                      : Math.floor(Math.random() * 3) + 1,
+                    views: Math.round(t.view),
+                    likes: Math.round(t.like),
+                    comments: Math.round(t.comment)
+                  };
+                })
+              });
+              break;
+            case "Asia":
+              formattedData.children[1].children.push({
+                name: d.name,
+                children: d.topic.map(t => {
+                  return {
+                    name: t.tag,
+                    type: categoryMapping[t.category[0]]
+                      ? categoryMapping[t.category[0]]
+                      : Math.floor(Math.random() * 3) + 1,
+                    views: Math.round(t.view),
+                    likes: Math.round(t.like),
+                    comments: Math.round(t.comment)
+                  };
+                })
+              });
+              break;
+            case "North America":
+              formattedData.children[2].children.push({
+                name: d.name,
+                children: d.topic.map(t => {
+                  return {
+                    name: t.tag,
+                    type: categoryMapping[t.category[0]]
+                      ? categoryMapping[t.category[0]]
+                      : Math.floor(Math.random() * 3) + 1,
+                    views: Math.round(t.view),
+                    likes: Math.round(t.like),
+                    comments: Math.round(t.comment)
+                  };
+                })
+              });
+              break;
+            case "South America":
+              formattedData.children[3].children.push({
+                name: d.name,
+                children: d.topic.map(t => {
+                  return {
+                    name: t.tag,
+                    type: categoryMapping[t.category[0]]
+                      ? categoryMapping[t.category[0]]
+                      : Math.floor(Math.random() * 3) + 1,
+                    views: Math.round(t.view),
+                    likes: Math.round(t.like),
+                    comments: Math.round(t.comment)
+                  };
+                })
+              });
+              break;
+            case "Oceania":
+              formattedData.children[4].children.push({
+                name: d.name,
+                children: d.topic.map(t => {
+                  return {
+                    name: t.tag,
+                    type: categoryMapping[t.category[0]]
+                      ? categoryMapping[t.category[0]]
+                      : Math.floor(Math.random() * 3) + 1,
+                    views: Math.round(t.view),
+                    likes: Math.round(t.like),
+                    comments: Math.round(t.comment)
+                  };
+                })
+              });
+              break;
+            default:
+              break;
+          }
+        }
+
+        setData(formattedData);
+      }
     };
-
     fetchData();
-  }, [dateTo, dateFrom]);
+  }, [dateFrom, dateTo]);
 
   return (
     <div className="App">
@@ -72,6 +225,8 @@ function App() {
       <AccentBar />
       <Dashboard>
         <Panel
+          data={data}
+          metric={metric}
           setMetric={setMetric}
           region={region}
           setRegion={setRegion}
@@ -80,9 +235,9 @@ function App() {
           dateTo={dateTo}
           setDateTo={setDateTo}
         />
-        {rawData ? (
+        {data ? (
           <Viz
-            rawData={rawData}
+            data={data}
             metric={metric}
             region={region}
             setRegion={setRegion}
@@ -93,7 +248,12 @@ function App() {
           <Loading>Loading Visualisation...</Loading>
         )}
       </Dashboard>
-      <Tooltip metric={metric} region={region} />
+      <Tooltip
+        metric={metric}
+        region={region}
+        dateFrom={dateFrom}
+        dateTo={dateTo}
+      />
     </div>
   );
 }
