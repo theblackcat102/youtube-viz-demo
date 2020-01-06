@@ -1,61 +1,16 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, Component } from "react";
 import styled from "styled-components";
 import ky from "ky";
 import { format, subWeeks } from "date-fns";
-
+import { BrowserRouter as Router, Route } from "react-router-dom";
 import Defaults from "./Defaults";
 import Panel from "./Panel";
 import Viz from "./Viz";
 import Tooltip from "./Tooltip";
+import { regionMapping, categoryMapping, MAIN_URL } from './Constant';
+import Tag from "./subview/Tags";
+import Region from "./subview/Region";
 
-const regionMapping = {
-  GB: "Europe",
-  CH: "Europe",
-  NL: "Europe",
-  IE: "Europe",
-  DE: "Europe",
-  DK: "Europe",
-  RU: "Europe",
-  IT: "Europe",
-  FR: "Europe",
-  SK: "Europe",
-  GR: "Europe",
-  PT: "Europe",
-  SG: "Asia",
-  HK: "Asia",
-  VN: "Asia",
-  MY: "Asia",
-  IN: "Asia",
-  ID: "Asia",
-  PH: "Asia",
-  KZ: "Asia",
-  AE: "Asia",
-  TH: "Asia",
-  JP: "Asia",
-  TW: "Asia",
-  US: "North America",
-  PR: "North America",
-  PA: "North America",
-  CA: "North America",
-  MX: "North America",
-  BR: "South America",
-  AR: "South America",
-  AU: "Oceania",
-  NZ: "Oceania"
-};
-
-const categoryMapping = {
-  1: 1,
-  10: 1,
-  17: 3,
-  20: 1,
-  22: 2,
-  23: 1,
-  24: 1,
-  25: 3,
-  26: 2,
-  28: 3
-};
 
 const AccentBar = styled.div`
   height: 5px;
@@ -92,10 +47,10 @@ const Loading = styled.div`
   }
 `;
 
-function App() {
+function Main() {
   const [data, setData] = useState(null);
   const [metric, setMetric] = useState("views");
-  const [region, setRegion] = useState("Global");
+  const [region, setRegion] = useState("Taiwan");
   const [dateFrom, setDateFrom] = useState(
     format(subWeeks(new Date(), 1), "yyyy-MM-dd")
   );
@@ -108,7 +63,7 @@ function App() {
     const fetchData = async () => {
       const fetched = await ky
         .get(
-          `https://api.notify.institute/main?unit=day&region=all&start=${dateFrom}&end=${dateTo}&rw=1&top=10`,
+          MAIN_URL+`?unit=day&region=all&start=${dateFrom}&end=${dateTo}&rw=1&top=10`,
           { timeout: 60000 }
         )
         .json();
@@ -256,6 +211,19 @@ function App() {
       />
     </div>
   );
+}
+
+class App extends Component {
+  render() {
+    return (
+      <Router>
+        <Route exact path="/" component={Main} />
+        <Route path="/tag/:tagId" component={Tag} />
+        <Route path="/region/:regionId" component={Region} />
+
+      </Router>
+    )
+  }
 }
 
 export default App;

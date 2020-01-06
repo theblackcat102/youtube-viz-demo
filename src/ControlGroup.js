@@ -129,7 +129,7 @@ const ControlGroupComp = ({
             <ControlOption value="Greece">Greece</ControlOption>
             <ControlOption value="Portugal">Portugal</ControlOption>
           </optgroup>
-          <optgroup label="Asia">
+          <optgroup label="Taiwan">
             <ControlOption value="Asia">Entire Asia</ControlOption>
             <ControlOption value="Singapore">Singapore</ControlOption>
             <ControlOption value="Hong Kong">Hong Kong</ControlOption>
