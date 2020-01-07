@@ -135,6 +135,9 @@ class Tag extends Component {
         this.loadData().then((res)=>{
             console.log(this.state.results);
             this.preprocessData().then((output)=>{
+                if (output.length === 0) {
+                    return;
+                }
                 if (this.state.videos !== null) {
                     this.state.videos = output.videos;
                 }
@@ -153,7 +156,7 @@ class Tag extends Component {
                     
                 }
                 this.setState({});
-
+                this.drawTimelineChart(output.videos);
                 this.drawTimeSeriesLineChart('Ranks', output.ranks);
                 this.drawTimeSeriesLineChart('Views', output.views);
                 this.drawTimeSeriesLineChart('Likes', output.likes);
@@ -163,7 +166,71 @@ class Tag extends Component {
         });
     }
 
+    drawTimelineChart(videos, height=360, width=900) {
+        const items = [];
+        let lane_idx=  0;
+        const dates = [], lanes = [];
+        for (var key in videos) {
+            var end = videos[key].end;
+            end = new Date(end.getTime() + (86400000));
+            items.push({
+                id: key,
+                start: videos[key].start,
+                end: end,
+                lane: lane_idx,
+                color: d3.hsl(Math.random()*360,0.75,0.75),
+            });
+            lanes.push(key);
+            dates.push(videos[key].start);
+            dates.push(end);
+            lane_idx+=1;
+        }
+        console.log(items);
+        const margin = {top: 50, right: 100, bottom: 50, left: 100};
+        const svg = d3.select(".tag-container").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+        var xScale = d3.scaleTime()
+            .domain([d3.min(dates), d3.max(dates)])
+            .range([0, width]); 
+        var yScale = d3.scaleBand()
+            .domain(lanes) 
+            .range([height, 0]); 
+        svg.append('text')
+            .attr('class', 'chartTitle')
+            .attr('x', 0)
+            .attr('y', -20)
+            .html('Video Tag')
+        svg.selectAll(".bar")
+            .data(items)
+            .enter().append("rect")
+            .attr("class", "bar")
+            .attr("x", function(d) { return xScale(d.start); })
+            .attr("width", function(d) {return xScale(d.end) - xScale(d.start); } )
+            .attr("y", function(d) { return yScale(d.id); })
+            .attr("fill", d=>d.color)
+            .attr("height", yScale.bandwidth());
+        svg.append("g")
+            .attr("transform", "translate(0," + height + ")")
+            .call(d3.axisBottom(xScale));
+        svg.append("g")
+            .attr("class", "timeline-y-axis")
+            .call(d3.axisLeft(yScale));
+        svg.selectAll(".timeline-y-axis .tick").each(function(d,i){        
+                d3.select(this)
+                  .append('image')
+                  .attr('xlink:href', 'https://img.youtube.com/vi/'+d+'/sddefault.jpg')
+                  .attr('x',-120)
+                  .attr('y',-32)
+                  .attr('width', 128)
+                  .attr('height',64);
+             }).on("click", function(d){
+                document.location.href = "https://www.youtube.com/watch?v=" + d;
+            });
+    }
 
     drawTimeSeriesLineChart(title, data, height=360, width=900) {
         let maxValue=-1, minValue=10000000;
