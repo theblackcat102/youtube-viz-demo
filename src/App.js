@@ -47,6 +47,24 @@ const Loading = styled.div`
   }
 `;
 
+function formatRegion(d) {
+  return {
+    name: d.name,
+    id: d.id,
+    children: d.topic.map(t => {
+      return {
+        name: t.tag,
+        type: categoryMapping[t.category[0]]
+          ? categoryMapping[t.category[0]]
+          : Math.floor(Math.random() * 3) + 1,
+        views: Math.round(t.view),
+        likes: Math.round(t.like),
+        comments: Math.round(t.comment)
+      };
+    })
+  };
+}
+
 function Main() {
   const [data, setData] = useState(null);
   const [metric, setMetric] = useState("views");
@@ -84,84 +102,19 @@ function Main() {
         for (const d of fetched.results) {
           switch (regionMapping[d.id]) {
             case "Europe":
-              formattedData.children[0].children.push({
-                name: d.name,
-                children: d.topic.map(t => {
-                  return {
-                    name: t.tag,
-                    type: categoryMapping[t.category[0]]
-                      ? categoryMapping[t.category[0]]
-                      : Math.floor(Math.random() * 3) + 1,
-                    views: Math.round(t.view),
-                    likes: Math.round(t.like),
-                    comments: Math.round(t.comment)
-                  };
-                })
-              });
+              formattedData.children[0].children.push(formatRegion(d));
               break;
             case "Asia":
-              formattedData.children[1].children.push({
-                name: d.name,
-                children: d.topic.map(t => {
-                  return {
-                    name: t.tag,
-                    type: categoryMapping[t.category[0]]
-                      ? categoryMapping[t.category[0]]
-                      : Math.floor(Math.random() * 3) + 1,
-                    views: Math.round(t.view),
-                    likes: Math.round(t.like),
-                    comments: Math.round(t.comment)
-                  };
-                })
-              });
+              formattedData.children[1].children.push(formatRegion(d));
               break;
             case "North America":
-              formattedData.children[2].children.push({
-                name: d.name,
-                children: d.topic.map(t => {
-                  return {
-                    name: t.tag,
-                    type: categoryMapping[t.category[0]]
-                      ? categoryMapping[t.category[0]]
-                      : Math.floor(Math.random() * 3) + 1,
-                    views: Math.round(t.view),
-                    likes: Math.round(t.like),
-                    comments: Math.round(t.comment)
-                  };
-                })
-              });
+              formattedData.children[2].children.push(formatRegion(d));
               break;
             case "South America":
-              formattedData.children[3].children.push({
-                name: d.name,
-                children: d.topic.map(t => {
-                  return {
-                    name: t.tag,
-                    type: categoryMapping[t.category[0]]
-                      ? categoryMapping[t.category[0]]
-                      : Math.floor(Math.random() * 3) + 1,
-                    views: Math.round(t.view),
-                    likes: Math.round(t.like),
-                    comments: Math.round(t.comment)
-                  };
-                })
-              });
+              formattedData.children[3].children.push(formatRegion(d));
               break;
             case "Oceania":
-              formattedData.children[4].children.push({
-                name: d.name,
-                children: d.topic.map(t => {
-                  return {
-                    name: t.tag,
-                    type: categoryMapping[t.category[0]]
-                      ? categoryMapping[t.category[0]]
-                      : Math.floor(Math.random() * 3) + 1,
-                    views: Math.round(t.view),
-                    likes: Math.round(t.like),
-                    comments: Math.round(t.comment)
-                  };
-                })
-              });
+              formattedData.children[4].children.push(formatRegion(d));
               break;
             default:
               break;

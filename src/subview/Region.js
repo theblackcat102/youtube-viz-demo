@@ -1,7 +1,12 @@
 import React, { Component } from "react";
+import {Helmet} from "react-helmet";
 import { MAIN_URL } from "../Constant";
+import TitleComp from "../Title";
+import Loading from "../components/Loading";
 import * as d3 from "d3";
-import '../styles/race.css';
+import '../styles/race.scss';
+import '../styles/region.scss';
+import '../styles/style.scss';
 
 const MAX_HEIGHT = 600;
 const BreakException = {};
@@ -41,6 +46,8 @@ class Region extends Component {
         this.state = {
             id: null,
             topic: [],
+            order_max: false,
+            maxValue: 100,
         };
         if (match.params.regionId) {
             this.state.id = match.params.regionId;
@@ -80,39 +87,21 @@ class Region extends Component {
 
     async componentDidMount() {
         this.loadData().then((res)=>{
-            this.drawRaceChart();
+            this.initData().then((trending_data)=>{
+                console.log(trending_data);
+                this.drawRaceChart(trending_data);
+            });
         });
     }
 
-    drawRaceChart() {
+    async initData() {
         let data = this.state.topic;
-        let order_max = false;
-        const defaultValue = order_max ? 0 : 100;
-        const maxValue = 100;
-        if (data.length == 0) {
-            return;
+        let order_max = this.state.order_max;
+        const maxValue = this.state.maxValue;
+        const defaultValue = order_max ? 0 : maxValue;
+        if (data.length === 0) {
+            return [];
         }
-        var svg = d3.select("body").append("svg")
-            .attr("width", 960)
-            .attr("height", MAX_HEIGHT);
-
-
-        var tickDuration = 500;
-        var top_n = 12;
-        var height = MAX_HEIGHT;
-        var width = 960;
-
-        const margin = {
-            top: 80,
-            right: 0,
-            bottom: 5,
-            left: 0
-        };
-
-        let barPadding = (height-(margin.bottom+margin.top))/(top_n*5);
-
-
-        console.log('Data size', data.length);
         let cluster = {};
         let datemap = {};
         data.forEach(d=>{
@@ -135,8 +124,6 @@ class Region extends Component {
                 console.log(d);
                 throw BreakException;
             }
-
-
         });
         var nameColor = {};
         let trending_data = [];
@@ -176,6 +163,35 @@ class Region extends Component {
         trending_data = trending_data.sort((a, b)=>{
             return a.date > b.date;
         });
+        return trending_data;
+    }
+
+    drawRaceChart(trending_data) {
+        if ( trending_data === undefined || trending_data.length === 0) {
+            return;
+        }
+
+        let order_max = this.state.order_max;
+        const maxValue = this.state.maxValue;
+        const tickDuration = 1000;
+        const top_n = 12;
+        const height = MAX_HEIGHT;
+        const dateTextRightMargin = 120;
+        const dateTextTopMargin = 80;
+        const axisWidth = 960;
+        const width = window.innerWidth;
+        var svg = d3.select("svg")
+            .attr("width", width)
+            .attr("height", MAX_HEIGHT);
+
+        const margin = {
+            top: 80,
+            right: 0,
+            bottom: 5,
+            left: 0
+        };
+
+        let barPadding = (height-(margin.bottom+margin.top))/(top_n*5);
 
         let day = trending_data[0].day;
         const end_day = trending_data[trending_data.length-1].day;
@@ -192,7 +208,7 @@ class Region extends Component {
 
         let x = d3.scaleLinear()
             .domain([0, d3.max(daySlice, d => d.value)])
-            .range([margin.left, width-margin.right-65]);
+            .range([margin.left, axisWidth-margin.right-65]);
         let y = d3.scaleLinear()
             .domain([top_n, 0])
             .range([height-margin.bottom, margin.top]);
@@ -241,8 +257,8 @@ class Region extends Component {
 
         let dateText = svg.append('text')
             .attr('class', 'dateText')
-            .attr('x', width-margin.right)
-            .attr('y', height-10)
+            .attr('x', width-dateTextRightMargin)
+            .attr('y', dateTextTopMargin)
             .style('text-anchor', 'end')
             .html(formatDate(dayInt2Date(day)))
             .call(halo, 10);
@@ -377,10 +393,28 @@ class Region extends Component {
     }
 
     render() {
-        this.drawRaceChart();
+        // this.drawRaceChart();
+        let content = (
+            <div className="chart-container">
+                <svg></svg>
+            </div>
+        );
 
+        if (this.state.topic.length === 0) {
+            content = (<Loading/>);
+        }
         return (
-            <div id="region"></div>
+            <div id="region">
+                <Helmet>
+                    <meta charSet="utf-8" />
+                    <title>Race Chart in {this.state.id}</title>
+                </Helmet>
+                <div className="color-bar"></div>
+                <navbar>
+                    <TitleComp></TitleComp> 
+                </navbar>
+                {content}
+            </div>
         )
     }
 }

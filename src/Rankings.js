@@ -57,8 +57,10 @@ const RankingsComp = ({ data, metric, region }) => {
         rankings.map((rank, idx) => {
           return (
             <RankingsItem key={idx}>
+              <a href={'/tag/'+rank.data.name} >
               {idx + 1}. {rank.data.name}
               <RankingsItemBadge type={rank.data.type} />
+              </a>
             </RankingsItem>
           );
         })}

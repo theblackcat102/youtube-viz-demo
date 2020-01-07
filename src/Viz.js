@@ -119,6 +119,18 @@ const renderViz = (wrapper, metric, region, setRegion, data) => {
     .attr("cx", d => d.x)
     .attr("cy", d => d.y)
     .attr("r", d => d.r)
+    .attr("class", d => { 
+      switch(d.depth) {
+        case 0:
+          return "global-circle";
+        case 1:
+          return "regional-circle";
+        case 2:
+          return "country-circle";
+        default:
+          return "tags-circle"
+      }
+     })
     .attr("fill", d => {
       switch (d.depth) {
         case 0:
@@ -207,8 +219,17 @@ const renderViz = (wrapper, metric, region, setRegion, data) => {
     })
     .on("mouseleave", d => {
       let tooltip = document.querySelector("#tooltip");
-
       tooltip.style.display = "none";
+    }).on("dblclick", d=>{
+      console.log(d.data);
+      if (d.depth == 2) {
+        window.open("/region/"+d.data.id);
+      }else if (d.depth == 3) {
+        window.open("/tag/"+d.data.name);
+      }
+      console.log(d.data.id);
+      console.log(d.depth);
+
     });
 
   labels

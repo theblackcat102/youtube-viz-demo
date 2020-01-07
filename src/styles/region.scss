@@ -1,0 +1,38 @@
+
+body {
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    margin: 0;
+    --font-primary: "Space Mono";
+    --color-accent-one: #7415f9;
+    --color-accent-two: #ed0cef;
+    --color-accent-three: #1caeb0;
+    --color-background: #151d1e;
+}
+
+
+#region {
+    height: 100vh;
+    background: #151d1e;
+    .chart-container {
+        background: #fff;
+    }
+    .header {
+        background: #151d1e;
+    }
+    
+    h1 {
+        font-size: 18px;
+        margin-bottom: -10px;
+    }
+    
+    navbar {
+        background: #151d1e;
+        width: 100%;
+        padding: 15px;
+        display: block;  
+    }
+}

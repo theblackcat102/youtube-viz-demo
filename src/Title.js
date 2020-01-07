@@ -66,5 +66,4 @@ const TitleComp = () => {
     </TitleGroup>
   );
 };
-
 export default TitleComp;

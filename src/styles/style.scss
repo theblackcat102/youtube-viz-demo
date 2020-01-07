@@ -1,0 +1,21 @@
+
+.color-bar {
+    width: 100vw;
+    height: 5px;
+    background: linear-gradient(
+      90deg,
+      rgba(129, 5, 216, 1) 0%,
+      rgba(237, 12, 239, 1) 50%,
+      rgba(28, 174, 176, 1) 100%
+    );  
+}
+
+.loading {
+  height: 100vh;
+  text-align: center;
+  svg {
+    width: 120px;
+    padding-top: 20vh;
+    background-color: transparent !important;
+  }
+}

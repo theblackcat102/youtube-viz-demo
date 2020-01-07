@@ -1,0 +1,58 @@
+/* Style the lines by removing the fill and applying a stroke */
+$line-chart-background: #151d1e;
+$line-chart-color: #fff;
+
+.line-container {
+    text-align: center;
+    background-color: $line-chart-background !important;
+}
+
+.line {
+    fill: none;
+    stroke: #ffab00;
+    stroke-width: 3;
+}
+
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
+
+/* Style the dots by assigning a fill and stroke */
+.dot {
+    fill: #ffab00;
+    stroke: #fff;
+}
+  
+.focus circle {
+  fill: none;
+  stroke: steelblue;
+}
+
+text.chartTitle {
+    font-family: "Space Mono";
+    font-size: 24px;
+    color: $line-chart-color !important;
+    fill: $line-chart-color !important;
+}
+
+.title-container {
+    width: 100%;
+    margin-left: 180px;
+    text-align: left;
+}
+.tag-title {
+    font-family: "Space Mono";
+    font-size: 24px;
+    left: 0;
+    color: $line-chart-color !important;
+}
+
+.x-axis, .y-axis {
+    line {
+        stroke: $line-chart-color !important;
+    }
+    text {
+        fill: $line-chart-color !important;
+    }
+}
