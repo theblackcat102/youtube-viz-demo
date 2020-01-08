@@ -56,7 +56,7 @@ class Region extends Component {
 
     async loadData() {
         const cachevalue = 'region_'+this.state.id;
-        return fetch(MAIN_URL+'/'+this.state.id+'?start=2019-12-20')
+        return fetch(MAIN_URL+'/'+this.state.id+'?start=2019-12-20&end=2019-01-08')
         .then((response) => response.json())
         .then((responseJson) => {
             if ('topic' in responseJson) {
@@ -197,14 +197,11 @@ class Region extends Component {
         const end_day = trending_data[trending_data.length-1].day;
         const start_day = trending_data[0].day;
 
-        console.log(trending_data[0]);
-
         let daySlice = trending_data.filter(d => d.day == day && !isNaN(d.value))
             .sort((a,b) => b.value - a.value)
             .slice(0, top_n);
 
         daySlice.forEach((d,i) => d.rank = i);
-
 
         let x = d3.scaleLinear()
             .domain([0, d3.max(daySlice, d => d.value)])
@@ -232,7 +229,10 @@ class Region extends Component {
             .attr('width', d => x(d.value)-x(0)-1)
             .attr('y', d => y(d.rank)+5)
             .style('fill', d => d.color )
-            .attr('height', y(1)-y(0)-barPadding);
+            .attr('height', y(1)-y(0)-barPadding)
+            .on('click', d=>{
+                window.open("/tag/"+d.name);
+            });
         svg.selectAll('text.label')
             .data(daySlice, d => d.name)
             .enter()
@@ -290,6 +290,9 @@ class Region extends Component {
                 .attr('y', d => y(top_n+1)+5)
                 .style('fill', d => d.color)
                 .attr('height', y(1)-y(0)-barPadding)
+                .on('click', d=>{
+                    window.open("/tag/"+d.name);
+                })
                 .transition()
                     .duration(tickDuration)
                     .ease(d3.easeLinear)
@@ -343,7 +346,8 @@ class Region extends Component {
                 .attr('y', d => y(top_n+1)+5)
                 .remove();
 
-            let valueLabels = svg.selectAll('.valueLabel').data(daySlice, d => d.name);
+            let valueLabels = svg.selectAll('.valueLabel')
+                .data(daySlice, d => d.name);
 
             valueLabels
                 .enter()

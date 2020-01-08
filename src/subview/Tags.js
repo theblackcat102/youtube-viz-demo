@@ -28,6 +28,7 @@ class Tag extends Component {
         this.state = {
             id: null,
             results: [],
+            similar: [],
             categories: [],
             regions: [],
             videos: null,
@@ -39,21 +40,39 @@ class Tag extends Component {
 
     async loadData() {
         const cachevalue = 'tag_'+this.state.id;
-        return fetch(TAG_URL+'/'+this.state.id)
+        return fetch(TAG_URL+'/'+this.state.id+'?start=2019-12-01')
         .then((response) => response.json())
+        .then((responseJson)=> {
+            return fetch(TAG_URL+'/'+this.state.id+'/similar').then((res)=>{
+                return res.json();
+            }).then((similar)=> {
+                console.log(similar);
+                responseJson.similar = similar.results;
+                return responseJson;
+            });
+        })
         .then((responseJson) => {
+            console.log('get');
+            console.log(responseJson);
             if ('results' in responseJson) {
                 this.setState((state)=>{
-                    return { results: responseJson.results }
+                    return { results: responseJson.results,
+                        similar: responseJson.similar }
                 });
             }
             localStorage.setItem(cachevalue, JSON.stringify(responseJson));
-            return responseJson.results;
+            return {
+                results: responseJson.results,
+                similar: responseJson.similar
+            };
         }).catch((err)=>{
             const cachedHits = localStorage.getItem(cachevalue);
+            let package_ = JSON.parse(cachedHits);
             if (cachedHits) {
-                const cachedResult = { results: JSON.parse(cachedHits).results };
-                this.setState(()=>{ return cachedResult; });
+                const cachedResult = { results: package_.results, similar: package_.similar };
+                this.setState((state)=>{ 
+                    return {results: package_.results, 
+                        similar: package_.similar }});
             }
         });
     }
@@ -119,7 +138,7 @@ class Tag extends Component {
                 date: d.date,
             })
         });
-        console.log(data[0]);
+        // console.log(data[0]);
         return {
             dislikes: dislikes,
             likes: likes,
@@ -133,7 +152,7 @@ class Tag extends Component {
     }
     async componentDidMount() {
         this.loadData().then((res)=>{
-            console.log(this.state.results);
+            // console.log(this.state.results);
             this.preprocessData().then((output)=>{
                 if (output.length === 0) {
                     return;
@@ -166,7 +185,7 @@ class Tag extends Component {
         });
     }
 
-    drawTimelineChart(videos, height=360, width=900) {
+    drawTimelineChart(videos, width=900) {
         const items = [];
         let lane_idx=  0;
         const dates = [], lanes = [];
@@ -185,6 +204,7 @@ class Tag extends Component {
             dates.push(end);
             lane_idx+=1;
         }
+        const height = (lane_idx+1)*60;
         console.log(items);
         const margin = {top: 50, right: 100, bottom: 50, left: 100};
         const svg = d3.select(".tag-container").append("svg")
@@ -299,12 +319,19 @@ class Tag extends Component {
         const components = [];
         components.push(<h2 class="tag-title">#{this.state.id}</h2>);
         if (this.state.categories.length !== 0) {
-            console.log('categories');
-            console.log(this.state.categories);
             let context = "";
             components.push(<p class="tag-title">
                 Category: 
                 { this.state.categories.map((cat)=> ( ' '+category2Name[parseInt(cat) ]) ) }
+            </p>);
+        }
+        if (this.state.similar && this.state.similar.length != 0) {
+            let context = "";
+            components.push(<p class="tag-title">
+                Similar Tags: 
+                { this.state.similar.slice(1, 10).map((cat)=> ( 
+                    <a href={'/tag/'+cat.tag}>{' #'+cat.tag}</a>
+                )) }
             </p>);
         }
         let content = (
