@@ -1,7 +1,12 @@
 
+html {
+    overflow-x: hidden; 
+}
 body {
     margin: 0;
     padding: 0;
+    overflow-x: hidden; 
+    -webkit-overflow-x: hidden;
 }
 
 :root {
@@ -15,6 +20,7 @@ body {
 
 
 #region {
+    width: 100vw;
     height: 100vh;
     background: #151d1e;
     .chart-container {
