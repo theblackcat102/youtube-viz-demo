@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, Component } from "react";
+import {Helmet} from "react-helmet";
 import styled from "styled-components";
 import ky from "ky";
 import { format, subWeeks } from "date-fns";
@@ -68,7 +69,7 @@ function formatRegion(d) {
 function Main() {
   const [data, setData] = useState(null);
   const [metric, setMetric] = useState("views");
-  const [region, setRegion] = useState("Taiwan");
+  const [region, setRegion] = useState("Asia");
   const [dateFrom, setDateFrom] = useState(
     format(subWeeks(new Date(), 1), "yyyy-MM-dd")
   );
@@ -129,6 +130,10 @@ function Main() {
 
   return (
     <div className="App">
+      <Helmet>
+          <meta charSet="utf-8" />
+          <title>Youtube Trend Visualization</title>
+      </Helmet>
       <Defaults />
       <AccentBar />
       <Dashboard>

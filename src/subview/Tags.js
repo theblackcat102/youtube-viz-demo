@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, Component } from "react";
+import React, { Component } from "react";
 import {Helmet} from "react-helmet";
 import TitleComp from "../Title";
 import Loading from "../components/Loading";
@@ -203,7 +203,7 @@ class Tag extends Component {
             .attr('class', 'chartTitle')
             .attr('x', 0)
             .attr('y', -20)
-            .html('Video Tag')
+            .html('Video Trending Timeline')
         svg.selectAll(".bar")
             .data(items)
             .enter().append("rect")
@@ -235,7 +235,6 @@ class Tag extends Component {
     drawTimeSeriesLineChart(title, data, height=360, width=900) {
         let maxValue=-1, minValue=10000000;
         const dates = [];
-        const radius = 6;
         const margin = {top: 50, right: 50, bottom: 50, left: 80}
         const svg = d3.select(".tag-container").append("svg")
             .attr("width", width + margin.left + margin.right)
@@ -248,9 +247,11 @@ class Tag extends Component {
             minValue = (minValue > d.value) ? d.value  : minValue;
             dates.push(d.date);
         });
-        data = data.sort((a, b)=>{
-            return a.date > b.date;
+        const sorted_data = data.sort((a, b)=>{
+            return a.date - b.date;
         });
+        // console.log('sort');
+        // console.log(sorted_data[0].date, sorted_data[sorted_data.length-1].date);
         var xScale = d3.scaleTime()
             .domain([d3.min(dates), d3.max(dates)])
             .range([0, width]); 
@@ -281,11 +282,11 @@ class Tag extends Component {
             .attr("class", "y-axis")
             .call(d3.axisLeft(yScale)); // Create an axis component with d3.axisLeft
         svg.append("path")
-            .datum(data)
+            .datum(sorted_data)
             .attr("class", "line")
             .attr("d", line);
         svg.selectAll(".dot")
-            .data(data)
+            .data(sorted_data)
             .enter().append("circle") // Uses the enter().append() method
             .attr("class", "dot") // Assign a class for styling
             .attr("cx", d=> xScale(d.date) )
