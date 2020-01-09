@@ -9,7 +9,6 @@ $line-chart-color: #fff;
 
 .line {
     fill: none;
-    stroke: #ffab00;
     stroke-width: 3;
 }
 
@@ -20,7 +19,6 @@ $line-chart-color: #fff;
 
 /* Style the dots by assigning a fill and stroke */
 .dot {
-    fill: #ffab00;
     stroke: #fff;
 }
   
@@ -36,7 +34,15 @@ text.chartTitle {
     fill: $line-chart-color !important;
 }
 
-.title-container {
+.graph-container {
+    width: 100%;
+    text-align: center;
+    background-color: $line-chart-background !important;
+}
+
+
+
+.title-container, .line-container, .timeline-container {
     width: 100%;
     margin-left: 180px;
     text-align: left;

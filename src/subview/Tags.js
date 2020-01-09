@@ -3,23 +3,10 @@ import {Helmet} from "react-helmet";
 import TitleComp from "../Title";
 import Loading from "../components/Loading";
 import * as d3 from "d3";
-import { TAG_URL, category2Name } from "../Constant";
+import { TAG_URL, SUGGESTION_URL, category2Name } from "../Constant";
+import { onlyUnique, parseDate } from "../components/Utils";
 import '../styles/line.scss';
 import '../styles/tag.scss';
-
-function onlyUnique(value, index, self) { 
-    return self.indexOf(value) === index;
-}
-
-function parseDate(date_str) { // parse different format String
-    let date;
-    if (date_str.indexOf('GMT') !== -1) {
-        date = new Date(date_str);
-    }
-    date_str = date_str.split(' ')[0].split('-');
-    date = new Date(date_str[0], date_str[1]-1, date_str[2]);   
-    return date;
-}
 
 
 class Tag extends Component {
@@ -27,14 +14,19 @@ class Tag extends Component {
         super(props);
         this.state = {
             id: null,
+            search: null,
             results: [],
             similar: [],
             categories: [],
+            suggestions: [],
             regions: [],
+            cat2color: {},
             videos: null,
         };
         if (match.params.tagId) {
             this.state.id = match.params.tagId;
+            this.state.search = this.state.id;
+            this.state.cat2color[this.state.id] = '#ffab00';
         }
     }
 
@@ -119,22 +111,27 @@ class Tag extends Component {
             });
             likes.push({
                 value: d.stats.like,
+                category: this.state.id,
                 date: d.date
             });
             views.push({
                 value: d.stats.view,
+                category: this.state.id,
                 date: d.date,
             })
             ranks.push({
                 value: d.stats.rank,
+                category: this.state.id,
                 date: d.date,
             })
             comments.push({
                 value: d.stats.comment,
+                category: this.state.id,
                 date: d.date,
             })
             dislikes.push({
                 value: d.stats.dislike,
+                category: this.state.id,
                 date: d.date,
             })
         });
@@ -205,9 +202,8 @@ class Tag extends Component {
             lane_idx+=1;
         }
         const height = (lane_idx+1)*60;
-        console.log(items);
         const margin = {top: 50, right: 100, bottom: 50, left: 100};
-        const svg = d3.select(".tag-container").append("svg")
+        const svg = d3.select(".timeline-container").append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
             .append("g")
@@ -254,15 +250,19 @@ class Tag extends Component {
 
     drawTimeSeriesLineChart(title, data, height=360, width=900) {
         let maxValue=-1, minValue=10000000;
-        const dates = [];
-        const margin = {top: 50, right: 50, bottom: 50, left: 80}
-        const svg = d3.select(".tag-container").append("svg")
+        const dates = [], categories = [];
+        const margin = {top: 50, right: 50, bottom: 100, left: 80}
+
+        const svg = d3.select(".timeline-container").append("svg")
             .attr("width", width + margin.left + margin.right)
             .attr("height", height + margin.top + margin.bottom)
             .append("g")
             .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
         data.forEach(d=>{
+            if (categories.indexOf(d.category) == -1) {
+                categories.push(d.category);
+            }
             maxValue = (maxValue < d.value) ? d.value  : maxValue;
             minValue = (minValue > d.value) ? d.value  : minValue;
             dates.push(d.date);
@@ -293,6 +293,21 @@ class Tag extends Component {
             .attr('x', 0)
             .attr('y', -20)
             .html(title)
+        
+        let catIdx = 0;
+        categories.forEach(cat=>{
+            svg.append("circle")
+                .attr("cx",width/2-70)
+                .attr("cy",height+70)
+                .attr("r", 6)
+                .style("fill", this.state.cat2color[cat]);
+            svg.append("text")
+                .attr("x", width/2-50)
+                .attr("y", height+75)
+                .text(cat)
+                .attr("fill", "#fff");
+            catIdx++;
+        })
         // 3. Call the x axis in a group tag
         svg.append("g")
             .attr("class", "x-axis")
@@ -304,16 +319,25 @@ class Tag extends Component {
         svg.append("path")
             .datum(sorted_data)
             .attr("class", "line")
-            .attr("d", line);
+            .attr("d", line)
+            .style("stroke", this.state.cat2color[this.state.id]);
         svg.selectAll(".dot")
             .data(sorted_data)
             .enter().append("circle") // Uses the enter().append() method
             .attr("class", "dot") // Assign a class for styling
+            .style("fill", d=> this.state.cat2color[d.category])
             .attr("cx", d=> xScale(d.date) )
             .attr("cy", d => yScale(d.value))
             .attr("r", 5)
     }
 
+
+    onChange(event, {newValue, method}) {
+        console.log(newValue);
+        this.setState({
+            search: newValue
+        })
+    }
 
     render() {
         const components = [];
@@ -335,9 +359,13 @@ class Tag extends Component {
             </p>);
         }
         let content = (
-            <div className="tag-container line-container">
-                <div class="title-container">
+            <div className="graph-container">
+                <div className="title-container">
                     {components}
+                </div>
+                <div className="timeline-container">
+                </div>
+                <div className="line-container">
                 </div>
             </div>
         );

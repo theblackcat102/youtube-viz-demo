@@ -91,3 +91,4 @@ const BASE_URL = "https://api.notify.institute";
 export const MAIN_URL = BASE_URL + "/main"
 export const REGION_URL = BASE_URL + "/region"
 export const TAG_URL = BASE_URL + "/tag"
+export const SUGGESTION_URL = BASE_URL + "/suggestion"
