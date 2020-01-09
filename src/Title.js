@@ -55,6 +55,7 @@ const Cursor = styled.div`
 const TitleComp = () => {
   return (
     <TitleGroup>
+      <a href="/">
       <Title style={{ color: "var(--color-accent-one)" }}>YouTube</Title>
       <Title style={{ color: "var(--color-accent-two)" }}>Trends</Title>
       <Title
@@ -63,6 +64,7 @@ const TitleComp = () => {
         Visualization
       </Title>
       <Cursor />
+      </a>
     </TitleGroup>
   );
 };

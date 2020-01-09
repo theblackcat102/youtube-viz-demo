@@ -1,34 +1,17 @@
 import React, { Component } from "react";
 import {Helmet} from "react-helmet";
 import { MAIN_URL } from "../Constant";
+import { dayInt2Date, formatDate } from "../components/Utils";
 import TitleComp from "../Title";
 import Loading from "../components/Loading";
 import * as d3 from "d3";
 import '../styles/race.scss';
+import '../styles/fontawesome.css';
 import '../styles/region.scss';
 import '../styles/style.scss';
 
 const MAX_HEIGHT = 600;
 const BreakException = {};
-
-function dayInt2Date(day) {
-    const date = new Date(day * 1000 * 60 * 60 * 24)
-    return date;
-}
-
-function formatDate(date) {
-    return date.getFullYear() + '-' + (date.getMonth()+1) + '-' +date.getDate();
-}
-
-function parseDate(date_str) { // parse different format String
-    let date;
-    if (date_str.indexOf('GMT') !== -1) {
-        date = new Date(date_str);
-    }
-    date_str = date_str.split('T')[0].split('-');
-    date = new Date(date_str[0], date_str[1]-1, date_str[2]);   
-    return date;
-}
 
 const halo = function(text, strokeWidth) {
     text.select(function() { return this.parentNode.insertBefore(this.cloneNode(true), this); })
@@ -46,6 +29,7 @@ class Region extends Component {
         this.state = {
             id: null,
             topic: [],
+            name: null,
             order_max: false,
             maxValue: 100,
         };
@@ -56,12 +40,18 @@ class Region extends Component {
 
     async loadData() {
         const cachevalue = 'region_'+this.state.id;
-        return fetch(MAIN_URL+'/'+this.state.id+'?start=2019-12-20&end=2019-01-08')
+        let startDate = new Date();
+        let endDate = startDate.getTime() - (1000 * 60 * 60 * 24 * 12);
+        endDate = formatDate(new Date(endDate));
+        startDate = formatDate(startDate);
+        // sorry I gonna make this sad param name
+        return fetch(MAIN_URL+'/'+this.state.id+'?start='+endDate+'&end='+startDate)
         .then((response) => response.json())
         .then((responseJson) => {
             if ('topic' in responseJson) {
                 this.setState((state)=>{
-                    return { topic: responseJson.topic }
+                    return { topic: responseJson.topic,
+                        name: responseJson.name, }
                 });
             }
             localStorage.setItem(cachevalue, JSON.stringify(responseJson));
@@ -69,7 +59,10 @@ class Region extends Component {
         }).catch((err)=>{
             const cachedHits = localStorage.getItem(cachevalue);
             if (cachedHits) {
-                const cachedResult = { topic: JSON.parse(cachedHits).topic };
+                const parsedResult = JSON.parse(cachedHits);
+                const cachedResult = { 
+                    topic: parsedResult.topic,
+                    name: parsedResult.name };
                 this.setState(()=>{ return cachedResult; });
             }
         });
@@ -166,19 +159,24 @@ class Region extends Component {
         return trending_data;
     }
 
-    drawRaceChart(trending_data) {
+
+    drawRaceChart(trending_data, day=null) {
         if ( trending_data === undefined || trending_data.length === 0) {
             return;
         }
 
         let order_max = this.state.order_max;
         const maxValue = this.state.maxValue;
-        const tickDuration = 1000;
-        const top_n = 12;
-        const height = MAX_HEIGHT;
-        const dateTextRightMargin = 120;
-        const dateTextTopMargin = 80;
-        const axisWidth = 960;
+        const tickDuration = 1000,
+            top_n = 12,
+            height = MAX_HEIGHT,
+            dateTextRightMargin = 200,
+            dateTextTopMargin = 200,
+            regionTextTopMargin = 120,
+            buttonRightMargin = 480,
+            buttonTopMargin = 250,
+            axisWidth = 960;
+        
         const width = window.innerWidth;
         var svg = d3.select("svg")
             .attr("width", width)
@@ -193,9 +191,10 @@ class Region extends Component {
 
         let barPadding = (height-(margin.bottom+margin.top))/(top_n*5);
 
-        let day = trending_data[0].day;
+        if (day === null)
+            day = trending_data[0].day;
+
         const end_day = trending_data[trending_data.length-1].day;
-        const start_day = trending_data[0].day;
 
         let daySlice = trending_data.filter(d => d.day == day && !isNaN(d.value))
             .sort((a,b) => b.value - a.value)
@@ -241,7 +240,10 @@ class Region extends Component {
             .attr('x', d => x(d.value)-8)
             .attr('y', d => y(d.rank)+5+((y(1)-y(0))/2)+1)
             .style('text-anchor', 'end')
-            .html(d => d.name);
+            .html(d => d.name)
+            .on('click', (d)=>{
+                window.open("/tag/"+d.name);
+            });
         svg.selectAll('text.valueLabel')
             .data(daySlice, d => d.name)
             .enter()
@@ -262,8 +264,15 @@ class Region extends Component {
             .style('text-anchor', 'end')
             .html(formatDate(dayInt2Date(day)))
             .call(halo, 10);
+        svg.append('text')
+            .attr('class', 'regionText')
+            .attr('x', width-dateTextRightMargin)
+            .attr('y', regionTextTopMargin)
+            .style('text-anchor', 'end')
+            .html(this.state.name)
+            .call(halo, 10);
 
-        let ticker = d3.interval(e => {
+        const ticker = d3.interval(e => {
             let prevDaySlice = daySlice;
             daySlice = trending_data.filter(d => d.day == day && !isNaN(d.value))
                 .sort((a,b) => b.value - a.value)
@@ -323,6 +332,9 @@ class Region extends Component {
             .attr('x', d => x(d.value)-8)
             .attr('y', d => y(top_n+1)+5+((y(1)-y(0))/2))
             .style('text-anchor', 'end')
+            .on('click', (d)=>{
+                window.open("/tag/"+d.name);
+            })
             .html(d => d.name)
             .transition()
                 .duration(tickDuration)
@@ -393,7 +405,44 @@ class Region extends Component {
             if(day == (end_day))
                 ticker.stop();
             day = day+1;
-        },tickDuration);
+        }, tickDuration);
+
+        svg.append('text')
+            .attr('x', width-buttonRightMargin+100)
+            .attr('y', buttonTopMargin)
+            .attr('font-family', 'Space Mono, monospace')
+            .text('Restart')
+            .on('click',(d)=>{
+                console.log('Rstart');
+                svg.selectAll("*").remove();
+                this.drawRaceChart(trending_data);
+            });
+        svg.append('text')
+            .attr('x', width-buttonRightMargin+60)
+            .attr('y', buttonTopMargin)
+            .text('/');
+        svg.append('text')
+            .attr('x', width-buttonRightMargin+170)
+            .attr('y', buttonTopMargin)
+            .text('/');
+
+        svg.append('text')
+            .attr('x', width-buttonRightMargin+200)
+            .attr('y', buttonTopMargin)
+            .text('Resume')
+            .on('click',(d)=>{
+                console.log('Resume');
+                svg.selectAll("*").remove();
+                this.drawRaceChart(trending_data, day=day);
+            });
+        svg.append('text')
+            .attr('x', width-buttonRightMargin)
+            .attr('y', buttonTopMargin)
+            .text('Stop')
+            .on('click', (d)=>{
+                console.log('Stop');
+                ticker.stop();
+            });
     }
 
     render() {
