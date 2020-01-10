@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import {Helmet} from "react-helmet";
 import { MAIN_URL } from "../Constant";
+import queryString from 'query-string';
+
 import { dayInt2Date, formatDate } from "../components/Utils";
 import TitleComp from "../Title";
 import Loading from "../components/Loading";
@@ -30,20 +32,43 @@ class Region extends Component {
             id: null,
             topic: [],
             name: null,
+            start: null,
+            end: null,
             order_max: false,
             maxValue: 100,
         };
+        let params = queryString.parse(this.props.location.search);
+        if ('start' in params) {
+            this.state.start = params['start'];
+        } 
+        if ('end' in params) {
+            this.state.end = params.end;
+        }
         if (match.params.regionId) {
             this.state.id = match.params.regionId;
         }
     }
 
     async loadData() {
-        const cachevalue = 'region_'+this.state.id;
-        let startDate = new Date();
-        let endDate = startDate.getTime() - (1000 * 60 * 60 * 24 * 12);
+        
+        let startDate;
+        if (this.state.start === null) {
+            startDate = new Date();
+        } else {
+            startDate = new Date(Date.parse(this.state.end));
+            console.log(startDate);
+        }
+        let endDate;
+        if (this.state.start === null) {
+            endDate = startDate.getTime() - (1000 * 60 * 60 * 24 * 12);
+        } else {
+            endDate = new Date(Date.parse(this.state.start));
+            console.log(endDate);
+        }
         endDate = formatDate(new Date(endDate));
         startDate = formatDate(startDate);
+        console.log(endDate, startDate);
+        const cachevalue = 'region_'+this.state.id+startDate+endDate;
         // sorry I gonna make this sad param name
         return fetch(MAIN_URL+'/'+this.state.id+'?start='+endDate+'&end='+startDate)
         .then((response) => response.json())
@@ -170,10 +195,10 @@ class Region extends Component {
         const tickDuration = 1000,
             top_n = 12,
             height = MAX_HEIGHT,
-            dateTextRightMargin = 200,
+            dateTextRightMargin = 100,
             dateTextTopMargin = 200,
             regionTextTopMargin = 120,
-            buttonRightMargin = 480,
+            buttonRightMargin = 380,
             buttonTopMargin = 250,
             axisWidth = 960;
         
@@ -263,14 +288,14 @@ class Region extends Component {
             .attr('y', dateTextTopMargin)
             .style('text-anchor', 'end')
             .html(formatDate(dayInt2Date(day)))
-            .call(halo, 10);
+            // .call(halo, 10);
         svg.append('text')
             .attr('class', 'regionText')
             .attr('x', width-dateTextRightMargin)
             .attr('y', regionTextTopMargin)
             .style('text-anchor', 'end')
             .html(this.state.name)
-            .call(halo, 10);
+            // .call(halo, 10);
 
         const ticker = d3.interval(e => {
             let prevDaySlice = daySlice;
@@ -326,15 +351,15 @@ class Region extends Component {
                 .data(daySlice, d => d.name);
 
             labels
-            .enter()
-            .append('text')
-            .attr('class', 'label')
-            .attr('x', d => x(d.value)-8)
-            .attr('y', d => y(top_n+1)+5+((y(1)-y(0))/2))
-            .style('text-anchor', 'end')
-            .on('click', (d)=>{
-                window.open("/tag/"+d.name);
-            })
+                .enter()
+                .append('text')
+                .attr('class', 'label')
+                .attr('x', d => x(d.value)-8)
+                .attr('y', d => y(top_n+1)+5+((y(1)-y(0))/2))
+                .style('text-anchor', 'end')
+                .on('click', (d)=>{
+                    window.open("/tag/"+d.name);
+                })
             .html(d => d.name)
             .transition()
                 .duration(tickDuration)
@@ -392,17 +417,17 @@ class Region extends Component {
 
 
             valueLabels
-            .exit()
-            .transition()
-                .duration(tickDuration)
-                .ease(d3.easeLinear)
-                .attr('x', d => x(d.value)+5)
-                .attr('y', d => y(top_n+1)+5)
-                .remove();
+                .exit()
+                .transition()
+                    .duration(tickDuration)
+                    .ease(d3.easeLinear)
+                    .attr('x', d => x(d.value)+5)
+                    .attr('y', d => y(top_n+1)+5)
+                    .remove();
 
             dateText.html(formatDate(dayInt2Date(day)));
 
-            if(day == (end_day))
+            if(day >= (end_day))
                 ticker.stop();
             day = day+1;
         }, tickDuration);
@@ -431,7 +456,6 @@ class Region extends Component {
             .attr('y', buttonTopMargin)
             .text('Resume')
             .on('click',(d)=>{
-                console.log('Resume');
                 svg.selectAll("*").remove();
                 this.drawRaceChart(trending_data, day=day);
             });
@@ -440,7 +464,6 @@ class Region extends Component {
             .attr('y', buttonTopMargin)
             .text('Stop')
             .on('click', (d)=>{
-                console.log('Stop');
                 ticker.stop();
             });
     }
