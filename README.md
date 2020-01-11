@@ -1,3 +1,20 @@
+# Youtube Trending Tag Visualization (frontend)
+
+[Backend here](https://github.com/theblackcat102/yt_trending_backend)
+
+Here's some showcase of the final visualization results
+
+![Landing page](https://github.com/theblackcat102/yt_trending_backend/blob/master/example/landing.png)
+
+![Race chart](https://github.com/theblackcat102/yt_trending_backend/blob/master/example/race.png)
+
+
+![Tag Header page](https://github.com/theblackcat102/yt_trending_backend/blob/master/example/tag_header.png)
+
+![Tag Stats](https://github.com/theblackcat102/yt_trending_backend/blob/master/example/tag_stats.png)
+
+
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
